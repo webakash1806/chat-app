@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import bcrypt from 'bcryptjs'
-
+import crypto from 'crypto'
 
 const userSchema = new Schema({
     role: {
@@ -50,6 +50,35 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 10)
     this.confirmPassword = await bcrypt.hash(this.confirmPassword, 10)
 })
+
+userSchema.methods = {
+    generateJWTToken: async function () {
+        return await jwt.sign(
+            {
+                id: this.id,
+                email: this.email,
+                role: this.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: process.env.JWT_EXPIRY
+            }
+        )
+    },
+    comparePassword: async function (plainPassword) {
+        return await bcrypt.compare(plainPassword, this.password)
+    },
+    generatePasswordResetToken: async function () {
+        const resetToken = crypto.randomBytes(20).toString('hex')
+
+        this.forgetPasswordToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex')
+        this.forgetPasswordExpiry = Date.now() + 5 * 60 * 1000
+        return resetToken
+    }
+}
 
 const User = model('User', userSchema)
 
