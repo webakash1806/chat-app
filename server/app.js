@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import cookieParser from 'cookie-parser'
 import morgan from 'morgan'
 import errorMiddleware from './middleware/error.middleware.js'
+import UserRoutes from './routes/auth.route.js'
 
 config()
 
@@ -29,6 +30,7 @@ app.use('/ping', function (req, res) {
     })
 })
 
+app.use('/api/v1/user', UserRoutes)
 
 app.all('*', (req, res) => {
     res.status(404).send("OOPS! page not found")
