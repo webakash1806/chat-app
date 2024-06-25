@@ -1,6 +1,7 @@
 import User from "../model/auth.model.js";
 import AppError from '../utils/error.utils.js'
 import cloudinary from 'cloudinary'
+import bcrypt from 'bcryptjs'
 const cookieOption = {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
@@ -208,10 +209,59 @@ const updateProfile = async (req, res, next) => {
     }
 }
 
+const changePassword = async (req, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body
+        const { id } = req.user
+
+        const user = await User.findById(id).select('+password')
+
+        const passwordCheck = await user.comparePassword(oldPassword)
+
+        if (!passwordCheck) {
+            return next(new AppError("Old password is wrong"), 400)
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10)
+        await user.save()
+
+        user.password = undefined
+
+        res.status(200).json({
+            status: true,
+            message: "Password changed successfully"
+        })
+    }
+    catch (e) {
+        return next(new AppError(e.message, 500))
+    }
+}
+
+const forgetPassword = async (req, res, next) => {
+    try {
+
+    }
+    catch (e) {
+        return next(new AppError(e.message, 500))
+    }
+}
+
+const resetPassword = async (req, res, next) => {
+    try {
+
+    }
+    catch (e) {
+        return next(new AppError(e.message, 500))
+    }
+}
+
 export {
     register,
     login,
     logout,
     profile,
-    updateProfile
+    updateProfile,
+    changePassword,
+    forgetPassword,
+    resetPassword,
 }
