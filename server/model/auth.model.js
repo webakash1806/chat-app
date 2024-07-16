@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
+import jwt from 'jsonwebtoken'
 
 const userSchema = new Schema({
     role: {

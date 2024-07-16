@@ -4,6 +4,7 @@ import {
     changePassword,
     login,
     logout,
+    profile,
     register,
     updateProfile
 } from '../controller/auth.controller.js'
@@ -15,6 +16,7 @@ const router = Router()
 router.post('/register', upload.single('avatar'), loginAuth, register)
 router.post('/login', loginAuth, login)
 router.get('/logout', logout)
+router.get('/me', isLoggedIn, profile)
 router.put('/change-password', isLoggedIn, changePassword)
 router.put('/update-profile', isLoggedIn, upload.single('avatar'), updateProfile)
 

@@ -77,7 +77,7 @@ const register = async (req, res, next) => {
         }
 
     } catch (e) {
-        return next(new AppError(err.message, 500))
+        return next(new AppError(e.message, 500))
     }
 }
 
