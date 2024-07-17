@@ -2,6 +2,7 @@ import User from "../model/auth.model.js";
 import AppError from '../utils/error.utils.js'
 import cloudinary from 'cloudinary'
 import bcrypt from 'bcryptjs'
+import fs from 'fs/promises'
 const cookieOption = {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
@@ -166,10 +167,13 @@ const updateProfile = async (req, res, next) => {
         if (fullName) {
             user.fullName = await fullName
         }
-
         if (req.file) {
             // Destroying the previous avatar in cloudinary
-            await cloudinary.v2.uploader.destroy(user.avatar.publicId)
+
+            if (user.avatar.publicId) {
+                await cloudinary.v2.uploader.destroy(user.avatar.publicId)
+            }
+
             try {
                 // Uploading the new avatar to cloudinary
                 const result = await cloudinary.v2.uploader.upload(req.file.path, {
@@ -179,11 +183,11 @@ const updateProfile = async (req, res, next) => {
                     gravity: 'faces',
                     crop: 'fill',
                 })
+
                 // Updating user's avatar information
                 if (result) {
                     user.avatar.publicId = result.public_id
                     user.avatar.secure_url = result.secure_url
-
                     // Removing the temporary file after avatar upload
                     fs.rm(`uploads/${req.file.filename}`)
                 }
@@ -200,7 +204,8 @@ const updateProfile = async (req, res, next) => {
         // Sending success response to the client
         res.status(200).json({
             success: true,
-            message: 'User Detail updated successfully'
+            message: 'User Detail updated successfully',
+            user
         })
     }
 
